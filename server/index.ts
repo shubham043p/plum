@@ -1,4 +1,5 @@
 import dotenv from 'dotenv';
+import path from 'path';
 dotenv.config();
 import express from 'express';
 import mongoose from 'mongoose';
@@ -22,13 +23,22 @@ mongoose.connect(process.env.MONGODB_URI as string)
 app.use('/api/auth', authRoutes);
 app.use('/api/quiz', quizRoutes);
 
-// Serve static files from the React frontend app
-import path from 'path';
-app.use(express.static(path.join(__dirname, '../client/dist')));
+app.get('/', (req, res) => {
+  res.send('AI Quiz API is running');
+});
+
+const staticPath = path.join(__dirname, '../client/dist');
+app.use(express.static(staticPath));
 
 // Anything that doesn't match the above routes, send back index.html
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../client/dist/index.html'));
+app.use((req, res) => {
+  const indexFile = path.join(__dirname, '../client/dist/index.html');
+  res.sendFile(indexFile, (err) => {
+    if (err) {
+      console.error('Error sending index.html:', err);
+      res.status(500).send('Error loading client app');
+    }
+  });
 });
 
 // Start Server
