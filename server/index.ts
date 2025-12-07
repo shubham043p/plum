@@ -22,8 +22,13 @@ mongoose.connect(process.env.MONGODB_URI as string)
 app.use('/api/auth', authRoutes);
 app.use('/api/quiz', quizRoutes);
 
-app.get('/', (req, res) => {
-  res.send('AI Quiz API is running');
+// Serve static files from the React frontend app
+import path from 'path';
+app.use(express.static(path.join(__dirname, '../client/dist')));
+
+// Anything that doesn't match the above routes, send back index.html
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../client/dist/index.html'));
 });
 
 // Start Server
